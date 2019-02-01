@@ -6,14 +6,14 @@ from setuptools import setup
 # Package meta-data.
 NAME = 'enex2md'
 DESCRIPTION = 'Convert enex to Markdown.'
-VERSION = '0.0.1'
+VERSION = '0.0.3'
 URL = 'https://github.com/janikarh/enex2md'
 EMAIL = 'janikarh@gmail.com'
 AUTHOR = 'Jani Karhunen'
 REQUIRES_PYTHON = '>=3.6.0'
 
-REQUIRED = ['lxml>=4.3.0']
-# REQUIRED = []
+REQUIRED = ['click',
+            'lxml>=4.3.0']
 
 # Import the README and use it as the long-description.
 with open("README.md", "r") as readme:
