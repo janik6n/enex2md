@@ -4,11 +4,16 @@ Enex2md is a command-line utility to convert Evernote export files (`*.enex`) to
 
 At the moment, this is more of a prototype, than actual conversion tool.
 
-**THIS IS VERY MUCH WORK IN PROGRESS**
+**THIS IS VERY MUCH WORK IN PROGRESS.**
 
 ## Installation
 
 `pip install -U enex2md`
+
+## Usage
+
+To use the CLI after installing, run the conversion with:
+`enex2md [enex-file-to-process]`
 
 ## Development
 
