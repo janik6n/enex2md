@@ -11,7 +11,7 @@ class Converter(object):
         self.enex_file = enex_file
 
     def echo_info(self):
-        return f"Helloooo {self.enex_file}"
+        return f"Enex-file: {self.enex_file}"
 
     def convert(self):
         if not os.path.exists(self.enex_file):

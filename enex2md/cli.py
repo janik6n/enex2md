@@ -6,18 +6,17 @@ import sys
 import click
 
 from enex2md.convert import Converter
-from enex2md import __version__
+# from enex2md import __version__
 
 
 @click.command()
 @click.argument('input_file')
 def app(input_file):
     """ Run the converter. Requires the input_file (data.enex) to be processed as the first argument. """
-    print(f"Input file: {input_file}")
-    print(__version__)
+    print(f"Processing input file: {input_file}")
+    # print(__version__)
 
     converter = Converter(input_file)
-    converter.echo_info()
     converter.convert()
 
     sys.exit()
