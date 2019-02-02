@@ -1,19 +1,41 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import io
+import os
+import re
 from setuptools import setup
 
 # Package meta-data.
 NAME = 'enex2md'
 DESCRIPTION = 'Convert enex to Markdown.'
-VERSION = '0.0.3'
 URL = 'https://github.com/janikarh/enex2md'
 EMAIL = 'janikarh@gmail.com'
 AUTHOR = 'Jani Karhunen'
 REQUIRES_PYTHON = '>=3.6.0'
 
 REQUIRED = ['click',
-            'lxml>=4.3.0']
+            'lxml', 'python-dateutil', 'html2text']
+
+# The rest you shouldn't have to touch too much :)
+# ------------------------------------------------
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+
+def read(*parts):
+    with io.open(os.path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 # Import the README and use it as the long-description.
 with open("README.md", "r") as readme:
@@ -22,7 +44,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name=NAME,
-    version=VERSION,
+    version=find_version('enex2md', '__init__.py'),
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -38,7 +60,7 @@ setup(
     include_package_data=True,
     license='MIT',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',

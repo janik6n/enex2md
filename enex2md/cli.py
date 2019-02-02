@@ -10,13 +10,18 @@ from enex2md.convert import Converter
 
 
 @click.command()
+@click.option('--disk', is_flag=True, help='output to disk instead of stdout (default)')
 @click.argument('input_file')
-def app(input_file):
+def app(disk, input_file):
     """ Run the converter. Requires the input_file (data.enex) to be processed as the first argument. """
-    print(f"Processing input file: {input_file}")
+    if disk:
+        output_option = 'DISK'
+    else:
+        output_option = 'STDOUT'
+    print(f"Processing input file: {input_file}, writing output to {output_option}.")
     # print(__version__)
 
-    converter = Converter(input_file)
+    converter = Converter(input_file, disk)
     converter.convert()
 
     sys.exit()

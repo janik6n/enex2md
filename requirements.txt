@@ -1,2 +1,4 @@
 Click>=7.0
 lxml>=4.30
+python-dateutil
+html2text
