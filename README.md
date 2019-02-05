@@ -1,18 +1,28 @@
 # enex2md
 
-Enex2md is a command-line utility to convert Evernote export files (`*.enex`) to Markdown.
+Enex2md is a command-line utility to convert Evernote export files (`*.enex`) to [GitHub Flavored Markdown](https://github.github.com/gfm/).
 
-In addition to the content itself, most of the metadata is included in the resulting Markdown.
+## Features
 
-Known issues:
+In addition to the content itself, the note metadata is included in the resulting Markdown.
 
-- Tables are not handled / verified
-- Lists are not handled / verified
-- Attachments are not handled at all
-- Tasks are not handled / verified
-- Bold and italic text is not handled correctly.
+Within the content, the following features are supported:
+
+- [x] Lists
+- [x] Tables created within Evernote are converted to [GFM Tables](https://github.github.com/gfm/#table).
+- [x] Tasks are converted to [GFM Task list items](https://github.github.com/gfm/#task-list-item)
+- [x] Subsequent empty lines are compressed to one.
+
+The html in enex files is *somewhat interesting*, thus some *magic is used to massage the data to functioning feature-rich Markdown*. Since the Magic Book has not yet been fully written, there are a couple of **known issues**:
+
+- Strong, emphasis and strong emphasis are lost in some cases.
+- Attachments are not handled at the moment.
+- Codeblocks are not handled correctly.
+- Images are lost (technically they are attachments in enex).
 
 **This is work in progress, but should already generate useful results.**
+
+See [Changelog](https://github.com/janikarh/enex2md/blob/master/CHANGELOG.md) for more details.
 
 ## Installation
 

@@ -36,9 +36,11 @@ class Converter(object):
             self._print_markdown(notes)
 
     def _parse_notes(self, xml_tree):
+        note_count = 0
         notes = []
         raw_notes = xml_tree.xpath('//note')
         for note in raw_notes:
+            note_count += 1
             keys = {}
             keys['title'] = note.xpath('title')[0].text
             keys['created'] = f"{parse(note.xpath('created')[0].text).strftime(self.date_format)} GMT"
@@ -50,22 +52,66 @@ class Converter(object):
             keys['tags'] = [tag.text for tag in note.xpath('tag')]
             keys['tags_string'] = ", ".join(tag for tag in keys['tags'])
 
-            ''' Content is HTML. '''
-            # keys['content'] = html2text.html2text(note.xpath('content')[0].text)
+            ''' Content is HTML, and requires little bit of magic. '''
 
             text_maker = html2text.HTML2Text()
             text_maker.single_line_break = True
             text_maker.inline_links = True
             text_maker.use_automatic_links = False
             text_maker.body_width = 0
-            keys['content'] = text_maker.handle(note.xpath('content')[0].text)
+
+            content_raw = note.xpath('content')[0].text
+
+            # Preprosessors:
+            content_lists_handled = self._handle_lists(content_raw)
+            content_tasks_handled = self._handle_tasks(content_lists_handled)
+            content_tables_handled = self._handle_tables(content_tasks_handled)
+
+            # Convert html > text
+            content_text = text_maker.handle(content_tables_handled)
+
+            # Postprocessors:
+            content_post1 = self._remove_extra_new_lines(content_text)
+
+            keys['content'] = content_post1
 
             ''' Generate safe filename for output. '''
             keys['markdown_filename'] = self._make_safe_filename(keys['title'])
 
             notes.append(keys)
 
+        print(f"Processed {note_count} note(s).")
         return notes
+
+    def _handle_tables(self, text):
+        """ Split by tables. Within the blocks containing tables, remove divs. """
+
+        parts = re.split(r'(<table.*?</table>)', text)
+
+        new_parts = []
+        for part in parts:
+            if part.startswith('<table'):
+                part = part.replace('<div>', '')
+                part = part.replace('</div>', '')
+            new_parts.append(part)
+
+        text = ''.join(new_parts)
+
+        return text
+
+    def _handle_tasks(self, text):
+        text = text.replace('<en-todo checked="true"/>', '<en-todo checked="true"/>[x] ')
+        text = text.replace('<en-todo checked="false"/>', '<en-todo checked="false"/>[ ] ')
+        return text
+
+    def _handle_lists(self, text):
+        text = re.sub(r'<ul>', '<br /><ul>', text)
+        text = re.sub(r'<ol>', '<br /><ol>', text)
+        return text
+
+    def _remove_extra_new_lines(self, text):
+        text = re.sub(r'\n+', '\n', text).strip()
+        return text
 
     def _export_notes(self, notes):
         sys.stdout.write(json.dumps(notes, indent=4, sort_keys=True))
@@ -105,7 +151,6 @@ class Converter(object):
         return note_content
 
     def _print_markdown(self, notes):
-
         for note in notes:
             print("--- New Note ---")
             for line in self._format_note(note):
