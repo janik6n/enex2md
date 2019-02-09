@@ -257,7 +257,7 @@ class Converter(object):
             keys['attachments'][attachment_filename]['data'] = resource.xpath('data')[0].text
             keys['attachments'][attachment_filename]['mime_type'] = resource.xpath('mime')[0].text
             """
-            if 'attachments' in note:
+            if 'attachments' in note and note['attachments']:
                 attachment_folder_name = f"{output_folder}/{filename_base}_attachments"
                 if not os.path.exists(attachment_folder_name):
                     os.makedirs(attachment_folder_name)
