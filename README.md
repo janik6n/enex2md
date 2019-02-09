@@ -8,6 +8,7 @@ In addition to the content itself, the note metadata is included in the resultin
 
 Within the content, the following features are supported:
 
+- [x] Strong and emphasis text styles.
 - [x] Lists
 - [x] Tables created within Evernote are converted to [GFM Tables](https://github.github.com/gfm/#table).
 - [x] Tasks are converted to [GFM Task list items](https://github.github.com/gfm/#task-list-item)
@@ -15,10 +16,9 @@ Within the content, the following features are supported:
 
 The html in enex files is *somewhat interesting*, thus some *magic is used to massage the data to functioning feature-rich Markdown*. Since the Magic Book has not yet been fully written, there are a couple of **known issues**:
 
-- Strong, emphasis and strong emphasis are lost in some cases.
 - Attachments are not handled at the moment.
-- Codeblocks are not handled correctly.
 - Images are lost (technically they are attachments in enex).
+- Codeblocks are not handled correctly.
 
 **This is work in progress, but should already generate useful results.**
 
@@ -37,6 +37,8 @@ To use the CLI after installing, run the conversion with:
 `enex2md [enex-file-to-process]`
 
 The output is written to `STDOUT` by default. If you want to write to disk instead, add a flag `--disk` to the command. This option will create a directory based on run time timestamp, and place individual files under that.
+
+*Please note, that on STDOUT output option attachments (including images) are not processed!*
 
 ## Development
 
