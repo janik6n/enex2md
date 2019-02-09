@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2019-02-09
+
+### Added
+
+- Attachments, including images, are now handled. When `--disk` is selected as output, attachments are stored in note specific subdirectory, and they are referenced on the note in corrent places.
+
+### Changed
+
+### Removed
+
+### Fixed
+
+
 ## [0.2.0] - 2019-02-09
 
 ### Added

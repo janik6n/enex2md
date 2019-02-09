@@ -1,4 +1,7 @@
+import base64
+import binascii
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -77,13 +80,26 @@ class Converter(object):
             content_text = text_maker.handle(content_pre)
 
             # Postprocessors:
-            content_post1 = self._remove_extra_new_lines(content_text)
+            content_post = self._remove_extra_new_lines(content_text)
 
-            keys['content'] = content_post1
+            keys['content'] = content_post
 
             ''' Generate safe filename base for output.
             The final name will be generated when writing, because of duplicate check. '''
             keys['markdown_filename_base'] = self._make_safe_name(keys['title'])
+
+            # Attachment data
+            if self.write_to_disk:
+                keys['attachments'] = []
+                raw_resources = note.xpath('resource')
+                for resource in raw_resources:
+                    attachment = {}
+                    attachment['filename'] = resource.xpath('resource-attributes/file-name')[0].text
+                    # Base64 encoded data has new lines! Because why not!
+                    clean_data = re.sub(r'\n', '', resource.xpath('data')[0].text).strip()
+                    attachment['data'] = clean_data
+                    attachment['mime_type'] = resource.xpath('mime')[0].text
+                    keys['attachments'].append(attachment)
 
             notes.append(keys)
 
@@ -96,6 +112,15 @@ class Converter(object):
         <div><en-media hash="..." type="image/png" /><br /></div>
         <div><en-media hash="..." type="image/jpeg" /></div>
         """
+        parts = re.split(r'(<en-media.*?/>)', text)
+        new_parts = []
+        for part in parts:
+            if part.startswith('<en-media'):
+                match = re.match(r'<en-media hash="(?P<md5_hash>.*?)".*? />', part)
+                if match:
+                    part = f"<div>ATCHMT:{match.group('md5_hash')}</div>"
+            new_parts.append(part)
+        text = ''.join(new_parts)
         return text
 
     def _handle_tables(self, text):
@@ -152,6 +177,8 @@ class Converter(object):
     def _handle_tasks(self, text):
         text = text.replace('<en-todo checked="true"/>', '<en-todo checked="true"/>[x] ')
         text = text.replace('<en-todo checked="false"/>', '<en-todo checked="false"/>[ ] ')
+        text = text.replace('<en-todo checked="true" />', '<en-todo checked="true"/>[x] ')
+        text = text.replace('<en-todo checked="false" />', '<en-todo checked="false"/>[ ] ')
         return text
 
     def _handle_lists(self, text):
@@ -217,11 +244,58 @@ class Converter(object):
     def _write_markdown(self, notes, output_folder):
         for note in notes:
             # Check, that the file name does not exist already. If it does, generate a new one.
-            filename = f"{output_folder}/{note['markdown_filename_base']}.md"
+            filename_base = note['markdown_filename_base']
+            filename = f"{output_folder}/{filename_base}.md"
             counter = 0
             while os.path.exists(filename):
                 counter += 1
-                filename = f"{output_folder}/{self._make_safe_name(note['markdown_filename_base'], counter)}.md"
+                filename_base = self._make_safe_name(note['markdown_filename_base'], counter)
+                filename = f"{output_folder}/{filename_base}.md"
 
+            """ Write attachments to disk, and fix references to note content.
+            keys['attachments'][attachment_filename]['filename'] = attachment_filename
+            keys['attachments'][attachment_filename]['data'] = resource.xpath('data')[0].text
+            keys['attachments'][attachment_filename]['mime_type'] = resource.xpath('mime')[0].text
+            """
+            if 'attachments' in note:
+                attachment_folder_name = f"{output_folder}/{filename_base}_attachments"
+                if not os.path.exists(attachment_folder_name):
+                    os.makedirs(attachment_folder_name)
+
+                for attachment in note['attachments']:
+                    try:
+                        decoded_attachment = base64.b64decode(attachment['data'])
+                        with open(f"{attachment_folder_name}/{attachment['filename']}", 'wb') as attachment_file:
+                            attachment_file.write(decoded_attachment)
+
+                        # Create MD5 hash
+                        md5 = hashlib.md5()
+                        md5.update(decoded_attachment)
+                        md5_hash = binascii.hexlify(md5.digest()).decode()
+
+                        # Fix attachment reference to note content
+                        note = self._fix_attachment_reference(
+                            note,
+                            md5_hash,
+                            attachment['mime_type'],
+                            f"{filename_base}_attachments",
+                            attachment['filename']
+                        )
+
+                    except Exception as e:
+                        print(f"Error processing attachment on note {filename_base}, attachment: {attachment['filename']}")
+                        print(str(e))
+
+            """ Write the actual markdown note to disk. """
             with open(filename, 'w') as output_file:
                 output_file.writelines("%s\n" % l for l in self._format_note(note))
+
+    def _fix_attachment_reference(self, note, md5_hash, mime_type, dir, name):
+        content = note['content']
+        if mime_type.startswith('image/'):
+            content = content.replace(f"ATCHMT:{md5_hash}", f"\n![{name}]({dir}/{name})")
+        else:
+            # For other than image attachments, we write the same ! in the beginning.
+            content = content.replace(f"ATCHMT:{md5_hash}", f"\n![{name}]({dir}/{name})")
+        note['content'] = content
+        return note
