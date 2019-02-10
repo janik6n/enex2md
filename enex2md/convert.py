@@ -7,6 +7,7 @@ import os
 import re
 import sys
 
+from bs4 import BeautifulSoup
 from dateutil.parser import parse
 import html2text
 from lxml import etree
@@ -65,22 +66,22 @@ class Converter(object):
             text_maker.body_width = 0
             text_maker.emphasis_mark = '*'
 
-            content_raw = note.xpath('content')[0].text
+            content_pre = note.xpath('content')[0].text
 
             # Preprosessors:
-            content_pre = self._handle_lists(content_raw)
+            if self.write_to_disk:
+                content_pre = self._handle_attachments(content_pre)
+            content_pre = self._handle_lists(content_pre)
             content_pre = self._handle_tasks(content_pre)
             content_pre = self._handle_strongs_emphases(content_pre)
             content_pre = self._handle_tables(content_pre)
-
-            if self.write_to_disk:
-                content_pre = self._handle_attachments(content_pre)
+            content_pre = self._handle_codeblocks(content_pre)
 
             # Convert html > text
             content_text = text_maker.handle(content_pre)
 
             # Postprocessors:
-            content_post = self._remove_extra_new_lines(content_text)
+            content_post = self._post_processor_code_newlines(content_text)
 
             keys['content'] = content_post
 
@@ -105,6 +106,41 @@ class Converter(object):
 
         print(f"Processed {note_count} note(s).")
         return notes
+
+    def _handle_codeblocks(self, text):
+        """ We would need to be able to recognise these (linebreaks added for brevity), and transform them to <pre> elements.
+        <div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.14902);-en-codeblock:true;">
+        <div>import this</div>
+        <div><br /></div>
+        <div>my_data = this.create_object()</div>
+        <div><br /></div>
+        <div># One line comment.</div>
+        <div><br /></div>
+        <div>“”” A block comment</div>
+        <div>    containing two lines.</div>
+        <div>“”"</div>
+        <div><br /></div>
+        <div>print(my data)</div>
+        </div>
+        """
+        soup = BeautifulSoup(text, 'html.parser')
+
+        for block in soup.find_all(style=re.compile(r'.*-en-codeblock:true.*')):
+            # Get the data, and set it in pre-element line by line.
+            code = 'code-begin-code-begin-code-begin\n'
+            for nugget in block.select('div'):
+                code += f"{nugget.text}\n"
+            code += 'code-end-code-end-code-end'
+
+            # Fix the duoblequotes
+            code = code.replace('“', '"')
+            code = code.replace('”', '"')
+
+            new_block = soup.new_tag('pre')
+            new_block.string = code
+            block.replace_with(new_block)
+
+        return str(soup)
 
     def _handle_attachments(self, text):
         """ Note content may have attachments, such as images.
@@ -186,8 +222,28 @@ class Converter(object):
         text = re.sub(r'<ol>', '<br /><ol>', text)
         return text
 
-    def _remove_extra_new_lines(self, text):
-        text = re.sub(r'\n+', '\n', text).strip()
+    def _post_processor_code_newlines(self, text):
+        new_lines = []
+        for line in text.split('\n'):
+            # The html2text conversion generates whitespace from enex. Let's remove the redundant.
+            line = line.rstrip()
+
+            if line == '**' or line == ' **':
+                line = ''
+
+            if line.startswith('    '):
+                line = line[4:]
+
+            if line == 'code-begin-code-begin-code-begin' or line == 'code-end-code-end-code-end':
+                new_lines.append('```')
+            else:
+                new_lines.append(line)
+
+        text = '\n'.join(new_lines)
+
+        # Merge multiple empty lines to one.
+        text = re.sub(r'\n{3,}', '\n\n', text).strip()
+
         return text
 
     def _export_notes(self, notes):

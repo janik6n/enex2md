@@ -1,5 +1,10 @@
 # enex2md
 
+[![version](https://img.shields.io/pypi/v/enex2md.svg?style=flat)](https://pypi.org/project/enex2md/)
+[![platform](https://img.shields.io/pypi/pyversions/enex2md.svg?style=flat)](https://pypi.org/project/enex2md/)
+[![wheel](https://img.shields.io/pypi/wheel/enex2md.svg?style=flat)](https://pypi.org/project/enex2md/)
+[![license](https://img.shields.io/github/license/janikarh/enex2md.svg?style=flat)](https://github.com/janikarh/enex2md/blob/master/LICENSE)
+
 Enex2md is a command-line utility to convert Evernote export files (`*.enex`) to [GitHub Flavored Markdown](https://github.github.com/gfm/).
 
 ## Features
@@ -13,11 +18,10 @@ Within the note content, the following features are supported:
 - [x] Tables created within Evernote are converted to [GFM Tables](https://github.github.com/gfm/#table)
 - [x] Tasks are converted to [GFM Task list items](https://github.github.com/gfm/#task-list-item)
 - [x] Images and other attachments
+- [x] Code blocks
 - [x] Subsequent empty lines are compressed to one.
 
-The html in enex files is *somewhat interesting*, thus some *magic is used to massage the data to functioning feature-rich Markdown*. Since the Magic Book has not yet been fully written, there are a couple of **known issues**:
-
-- Codeblocks are not handled correctly. The content is preserved, formatting is lost.
+The html in enex files is *somewhat interesting*, thus some *magic is used to massage the data to functioning feature-rich Markdown*. The Magic Book used here has not yet been fully written, so there might be some unfortunate side effects. Should you find one, [open an issue on GitHub](https://github.com/janikarh/enex2md/issues) with a well written description and **a test enex file** as an attachment.
 
 See [Changelog](https://github.com/janikarh/enex2md/blob/master/CHANGELOG.md) for more details.
 

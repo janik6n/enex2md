@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2019-02-10
+
+### Added
+
+### Changed
+
+### Removed
+
+### Fixed
+
+- Code blocks now preserve formatting, as if they were <pre> elements in enex!
+- Removing consecutive empty lines works now more robustly.
+
+
 ## [0.3.1] - 2019-02-09
 
 ### Added

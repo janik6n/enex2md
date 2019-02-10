@@ -15,7 +15,7 @@ AUTHOR = 'Jani Karhunen'
 REQUIRES_PYTHON = '>=3.6.0'
 
 REQUIRED = ['click',
-            'lxml', 'python-dateutil', 'html2text']
+            'lxml', 'python-dateutil', 'html2text', 'beautifulsoup4']
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
