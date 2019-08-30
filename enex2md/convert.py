@@ -51,7 +51,8 @@ class Converter(object):
             keys['created'] = f"{parse(note.xpath('created')[0].text).strftime(self.date_format)} GMT"
             if note.xpath('updated'):
                 keys['updated'] = f"{parse(note.xpath('updated')[0].text).strftime(self.date_format)} GMT"
-            keys['author'] = note.xpath('note-attributes/author')[0].text
+            if note.xpath('note-attributes/author'):
+                keys['author'] = note.xpath('note-attributes/author')[0].text
             if note.xpath('note-attributes/source-url'):
                 keys['source_url'] = note.xpath('note-attributes/source-url')[0].text
             keys['tags'] = [tag.text for tag in note.xpath('tag')]
@@ -277,7 +278,8 @@ class Converter(object):
         note_content.append("")
         note_content.append("## Note metadata")
         note_content.append("")
-        note_content.append(f"- Created by: {note['author']}")
+        if 'author' in note:
+            note_content.append(f"- Created by: {note['author']}")
         note_content.append(f"- Created at: {note['created']}")
         note_content.append(f"- Updated at: {note['updated']}")
         if 'source_url' in note:
