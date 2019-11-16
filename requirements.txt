@@ -1,5 +1,5 @@
 Click>=7.0
-lxml>=4.30
-python-dateutil
-html2text
-beautifulsoup4
+lxml>=4.4.1
+python-dateutil>=2.7.0
+html2text>=2019.9.26
+beautifulsoup4>=4.8.1

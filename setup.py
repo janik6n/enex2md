@@ -14,8 +14,11 @@ EMAIL = 'janikarh@gmail.com'
 AUTHOR = 'Jani Karhunen'
 REQUIRES_PYTHON = '>=3.6.0'
 
-REQUIRED = ['click',
-            'lxml', 'python-dateutil', 'html2text', 'beautifulsoup4']
+REQUIRED = ['Click>=7.0',
+            'lxml>=4.4.1',
+            'python-dateutil>=2.7.0',
+            'html2text>=2019.9.26',
+            'beautifulsoup4>=4.8.1']
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
