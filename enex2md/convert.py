@@ -286,7 +286,8 @@ class Converter(object):
         if 'author' in note:
             note_content.append(f"- Created by: {note['author']}")
         note_content.append(f"- Created at: {note['created']}")
-        note_content.append(f"- Updated at: {note['updated']}")
+        if 'updated' in note:
+            note_content.append(f"- Updated at: {note['updated']}")
         if 'source_url' in note:
             note_content.append(f"- Source URL: <{note['source_url']}>")
         note_content.append(f"- Tags: {note['tags_string']}")
