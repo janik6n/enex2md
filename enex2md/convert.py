@@ -96,7 +96,12 @@ class Converter(object):
                 raw_resources = note.xpath('resource')
                 for resource in raw_resources:
                     attachment = {}
-                    attachment['filename'] = resource.xpath('resource-attributes/file-name')[0].text
+                    try:
+                        attachment['filename'] = resource.xpath('resource-attributes/file-name')[0].text
+                    except IndexError:
+                        print(f"Skipping attachment on note with title \"{keys['title']}\" because the name xml element is missing (resource/resource-attributes/file-name).")
+                        continue
+
                     # Base64 encoded data has new lines! Because why not!
                     clean_data = re.sub(r'\n', '', resource.xpath('data')[0].text).strip()
                     attachment['data'] = clean_data
